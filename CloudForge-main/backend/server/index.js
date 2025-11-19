@@ -39,9 +39,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudforg
 
 // Serve static files from frontend/dist directory
 const frontendDistPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
-console.log('🔍 Frontend dist path:', frontendDistPath);
-console.log('🔍 __dirname:', __dirname);
-console.log('🔍 Directory contents:', require('fs').readdirSync(path.dirname(frontendDistPath)));
 app.use(express.static(frontendDistPath));
 
 // API Routes
