@@ -38,7 +38,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudforg
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Serve static files from frontend/dist directory
-const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+const frontendDistPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
 console.log('🔍 Frontend dist path:', frontendDistPath);
 console.log('🔍 __dirname:', __dirname);
 console.log('🔍 Directory contents:', require('fs').readdirSync(path.dirname(frontendDistPath)));
