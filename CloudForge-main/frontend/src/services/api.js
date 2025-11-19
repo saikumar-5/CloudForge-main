@@ -8,7 +8,8 @@ if (!API_URL && typeof window !== 'undefined') {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     API_URL = 'http://localhost:5000/api';
   } else {
-    API_URL = "http://cloudforge.ddns.net:5000";
+    // Use the same origin as the frontend (no CORS issues!)
+    API_URL = `${window.location.origin}/api`;
   }
 }
 
