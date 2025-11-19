@@ -2,7 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { io } from 'socket.io-client';
 import { useAuth } from './auth-context';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+// Determine Socket.IO URL based on environment
+const getSocketURL = () => {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
+  }
+  
+  // Use current window origin (same host and port)
+  // This ensures the client connects to wherever the app is served from
+  return window.location.origin;
+};
 
 const RealtimeContext = createContext({
   socket: null,
@@ -33,6 +42,9 @@ export const RealtimeProvider = ({ children }) => {
   // Connect to Socket.IO server
   useEffect(() => {
     if (!user) return;
+
+    const SOCKET_URL = getSocketURL();
+    console.log('🔗 Socket.IO connecting to:', SOCKET_URL);
 
     const newSocket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],

@@ -3,27 +3,33 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+const __dirname = path.resolve();
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: process.env.NODE_ENV === 'production' ? false : '*',
     methods: ['GET', 'POST']
   }
 });
-app.use(cors({
-  origin: ['https://cloudforge.ddns.net', 'http://localhost:3000'],
-  credentials: true
-}));
 
-// Middleware
-app.use(cors({
-  origin: '*',
+// CORS configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? false 
+    : ['https://cloudforge.ddns.net', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -32,7 +38,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudforg
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Routes
+// Serve static files from frontend/dist directory
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// API Routes
 const authRoutes = require('../routes/auth');
 app.use('/api/auth', authRoutes);
 
@@ -52,6 +62,15 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
+});
+
+// SPA fallback: serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  // Don't serve index.html for API requests that failed
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ success: false, message: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Error handling middleware
