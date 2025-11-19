@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
-const __dirname = path.resolve();
+const __dirname = path.dirname(require.main.filename);
 
 const io = new Server(server, {
   cors: {
